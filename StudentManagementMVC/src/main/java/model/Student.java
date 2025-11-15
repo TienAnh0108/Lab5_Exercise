@@ -1,4 +1,4 @@
-package com.student.model;
+package model;
 
 import java.sql.Timestamp;
 
