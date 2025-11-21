@@ -102,7 +102,7 @@ public class StudentController extends HttpServlet {
 
     // Insert new student
     private void insertStudent(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException {
 
         String studentCode = request.getParameter("studentCode");
         String fullName = request.getParameter("fullName");
@@ -111,6 +111,16 @@ public class StudentController extends HttpServlet {
 
         Student newStudent = new Student(studentCode, fullName, email, major);
 
+        // === Validation ===
+        if (!validateStudent(newStudent, request)) {
+            request.setAttribute("student", newStudent);
+
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-form.jsp");
+            dispatcher.forward(request, response);
+            return; // STOP
+        }
+
+        // === If valid, insert ===
         if (studentDAO.addStudent(newStudent)) {
             response.sendRedirect("student?action=list&message=Student added successfully");
         } else {
@@ -120,7 +130,7 @@ public class StudentController extends HttpServlet {
 
     // Update student
     private void updateStudent(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException {
 
         int id = Integer.parseInt(request.getParameter("id"));
         String studentCode = request.getParameter("studentCode");
@@ -131,6 +141,16 @@ public class StudentController extends HttpServlet {
         Student student = new Student(studentCode, fullName, email, major);
         student.setId(id);
 
+        // === Validation ===
+        if (!validateStudent(student, request)) {
+            request.setAttribute("student", student);
+
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-form.jsp");
+            dispatcher.forward(request, response);
+            return; // STOP
+        }
+
+        // === If valid, update ===
         if (studentDAO.updateStudent(student)) {
             response.sendRedirect("student?action=list&message=Student updated successfully");
         } else {
@@ -175,5 +195,52 @@ public class StudentController extends HttpServlet {
         } else {
             response.sendRedirect("student?action=list&error=Failed to delete student");
         }
+    }
+
+    private boolean validateStudent(Student student, HttpServletRequest request) {
+        boolean isValid = true;
+
+        // ===== Validate Student Code =====
+        String code = student.getStudentCode();
+        String codePattern = "[A-Z]{2}[0-9]{3,}";
+
+        if (code == null || code.trim().isEmpty()) {
+            request.setAttribute("errorCode", "Student code is required");
+            isValid = false;
+        } else if (!code.matches(codePattern)) {
+            request.setAttribute("errorCode", "Invalid format. Use 2 letters + 3+ digits (e.g., SV001)");
+            isValid = false;
+        }
+
+        // ===== Validate Full Name =====
+        String name = student.getFullName();
+
+        if (name == null || name.trim().isEmpty()) {
+            request.setAttribute("errorName", "Full name is required");
+            isValid = false;
+        } else if (name.trim().length() < 2) {
+            request.setAttribute("errorName", "Full name must be at least 2 characters");
+            isValid = false;
+        }
+
+        // ===== Validate Email (only if provided) =====
+        String email = student.getEmail();
+        String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+
+        if (email != null && !email.trim().isEmpty()) {
+            if (!email.matches(emailPattern)) {
+                request.setAttribute("errorEmail", "Invalid email format");
+                isValid = false;
+            }
+        }
+
+        // ===== Validate Major =====
+        String major = student.getMajor();
+        if (major == null || major.trim().isEmpty()) {
+            request.setAttribute("errorMajor", "Major is required");
+            isValid = false;
+        }
+
+        return isValid;
     }
 }
