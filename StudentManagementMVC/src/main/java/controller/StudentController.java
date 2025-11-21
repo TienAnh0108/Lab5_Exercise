@@ -46,6 +46,12 @@ public class StudentController extends HttpServlet {
             case "delete":
                 deleteStudent(request, response);
                 break;
+            case "sort":
+                sortStudents(request, response);
+                break;
+            case "filter":
+                filterStudents(request, response);
+                break;
             default:
                 listStudents(request, response);
                 break;
@@ -181,6 +187,40 @@ public class StudentController extends HttpServlet {
 
         // 4. Forward to JSP
         RequestDispatcher dispatcher = request.getRequestDispatcher("views/student-list.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void sortStudents(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String sortBy = request.getParameter("sortBy");
+        String order = request.getParameter("order");
+
+        // Gọi DAO
+        List<Student> students = studentDAO.getStudentsSorted(sortBy, order);
+
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("students", students);
+        request.setAttribute("sortBy", sortBy);
+        request.setAttribute("order", order);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void filterStudents(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String major = request.getParameter("major");
+
+        // Gọi DAO
+        List<Student> students = studentDAO.getStudentsByMajor(major);
+
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("students", students);
+        request.setAttribute("selectedMajor", major);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/views/student-list.jsp");
         dispatcher.forward(request, response);
     }
 

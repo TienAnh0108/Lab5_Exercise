@@ -213,19 +213,113 @@
             </c:if>
 
             <!-- Student Table -->
+            <!-- ======================= FILTER MAJOR ======================= -->
+            <div style="margin-bottom: 20px;">
+                <form action="student" method="get" 
+                      style="display: flex; gap: 10px; align-items: center;">
+
+                    <input type="hidden" name="action" value="filter">
+
+                    <label style="color:#333; font-weight:600;">Filter by Major:</label>
+
+                    <select name="major"
+                            style="padding: 10px; border-radius: 5px; border:1px solid #ccc;">
+                        <option value="">All Majors</option>
+
+                        <option value="Computer Science"
+                                ${selectedMajor == 'Computer Science' ? 'selected' : ''}>
+                            Computer Science
+                        </option>
+                        <option value="Information Technology"
+                                ${selectedMajor == 'Information Technology' ? 'selected' : ''}>
+                            Information Technology
+                        </option>
+                        <option value="Software Engineering"
+                                ${selectedMajor == 'Software Engineering' ? 'selected' : ''}>
+                            Software Engineering
+                        </option>
+                        <option value="Business Administration"
+                                ${selectedMajor == 'Business Administration' ? 'selected' : ''}>
+                            Business Administration
+                        </option>
+                    </select>
+
+                    <button class="btn btn-primary">Apply</button>
+
+                    <c:if test="${not empty selectedMajor}">
+                        <a href="student?action=list" class="btn btn-secondary">Clear</a>
+                    </c:if>
+                </form>
+            </div>
+
+            <!-- ======================= SORT + TABLE ======================= -->
+
+            <c:set var="reverseOrder" value="${order == 'asc' ? 'desc' : 'asc'}" />
+
             <c:choose>
                 <c:when test="${not empty students}">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Student Code</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Major</th>
+                                <!-- SORTABLE: ID -->
+                                <th>
+                                    <a href="student?action=sort&sortBy=id&order=${reverseOrder}"
+                                       style="color:white; text-decoration:none;">
+                                        ID
+                                    </a>
+                                    <c:if test="${sortBy == 'id'}">
+                                        <span>${order == 'asc' ? '▲' : '▼'}</span>
+                                    </c:if>
+                                </th>
+
+                                <!-- SORTABLE: CODE -->
+                                <th>
+                                    <a href="student?action=sort&sortBy=student_code&order=${reverseOrder}"
+                                       style="color:white; text-decoration:none;">
+                                        Student Code
+                                    </a>
+                                    <c:if test="${sortBy == 'student_code'}">
+                                        <span>${order == 'asc' ? '▲' : '▼'}</span>
+                                    </c:if>
+                                </th>
+
+                                <!-- SORTABLE: NAME -->
+                                <th>
+                                    <a href="student?action=sort&sortBy=full_name&order=${reverseOrder}"
+                                       style="color:white; text-decoration:none;">
+                                        Full Name
+                                    </a>
+                                    <c:if test="${sortBy == 'full_name'}">
+                                        <span>${order == 'asc' ? '▲' : '▼'}</span>
+                                    </c:if>
+                                </th>
+
+                                <!-- SORTABLE: EMAIL -->
+                                <th>
+                                    <a href="student?action=sort&sortBy=email&order=${reverseOrder}"
+                                       style="color:white; text-decoration:none;">
+                                        Email
+                                    </a>
+                                    <c:if test="${sortBy == 'email'}">
+                                        <span>${order == 'asc' ? '▲' : '▼'}</span>
+                                    </c:if>
+                                </th>
+
+                                <!-- SORTABLE: MAJOR -->
+                                <th>
+                                    <a href="student?action=sort&sortBy=major&order=${reverseOrder}"
+                                       style="color:white; text-decoration:none;">
+                                        Major
+                                    </a>
+                                    <c:if test="${sortBy == 'major'}">
+                                        <span>${order == 'asc' ? '▲' : '▼'}</span>
+                                    </c:if>
+                                </th>
+
                                 <th>Actions</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             <c:forEach var="student" items="${students}">
                                 <tr>
@@ -239,9 +333,9 @@
                                             <a href="student?action=edit&id=${student.id}" class="btn btn-secondary">
                                                 ✏️ Edit
                                             </a>
-                                            <a href="student?action=delete&id=${student.id}" 
+                                            <a href="student?action=delete&id=${student.id}"
                                                class="btn btn-danger"
-                                               onclick="return confirm('Are you sure you want to delete this student?')">
+                                               onclick="return confirm('Are you sure?')">
                                                 🗑️ Delete
                                             </a>
                                         </div>
@@ -251,6 +345,7 @@
                         </tbody>
                     </table>
                 </c:when>
+
                 <c:otherwise>
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>
@@ -259,6 +354,7 @@
                     </div>
                 </c:otherwise>
             </c:choose>
+
         </div>
     </body>
 </html>
